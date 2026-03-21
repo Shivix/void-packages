@@ -1,24 +1,11 @@
-# Template file for 'zls'
 pkgname=zls
-version=0.13.0
+version=0.16.0
 revision=1
 build_style=zig-build
-configure_args="-Dpie"
+configure_args="-Doptimize=ReleaseFast"
 short_desc="Zig language server"
-maintainer="Orphaned <orphan@voidlinux.org>"
+maintainer="Shivix <none>"
 license="MIT"
 homepage="https://github.com/zigtools/zls"
-_tracy_gitrev="37aff70dfa50cf6307b3fee6074d627dc2929143"
-distfiles="https://github.com/zigtools/zls/archive/refs/tags/${version}.tar.gz
- https://github.com/wolfpld/tracy/archive/${_tracy_gitrev}.tar.gz"
-checksum="2e8046b6b0de765a4bf4bb828345e2badc8b828bc257dc931d0f56b147684d9f
- c24ce6179df7efb8a114fe409d197e26e4b937c6fc1258bea15840b15b1f79ff"
-skip_extraction="${_tracy_gitrev}.tar.gz"
-
-post_extract() {
-	vsrcextract -C src/tracy ${_tracy_gitrev}.tar.gz
-}
-
-post_install() {
-	vlicense LICENSE
-}
+distfiles="https://github.com/zigtools/zls/archive/refs/heads/master.tar.gz"
+checksum=c6f61a1914c60d2e0dd0e25c9149035988c05985cdf83b490bfa4d15dca9a31b

@@ -1,0 +1,15 @@
+pkgname=prefix
+version=1.2.1
+revision=1
+build_style=cargo
+short_desc="A customizable pretty printer for FIX messages"
+maintainer="shivix <none>"
+license="MIT"
+homepage="https://github.com/Shivix/prefix"
+distfiles="https://github.com/Shivix/prefix/archive/refs/tags/v${version}.tar.gz"
+checksum=cc10087e8c6708e0cf871e45f979887fa33c9d41473b98079f9a568b47756127
+
+post_install() {
+	vcompletion completion/prefix.fish fish
+	vman man/prefix.1
+}

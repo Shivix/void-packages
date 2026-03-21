@@ -1,0 +1,14 @@
+pkgname=lus
+version=1.0.2
+revision=1
+build_style=gnu-makefile
+short_desc="Simple note management tool"
+maintainer="shivix <none>"
+license="MIT"
+homepage="https://github.com/Shivix/lus"
+distfiles="https://github.com/Shivix/lus/archive/refs/heads/master.tar.gz"
+checksum=36c13bae0ae5dfaf59dc1c468d997df9efb481a44d6ab3b950f1fe87e511aa46
+
+post_install() {
+	vcompletion completions.fish fish
+}

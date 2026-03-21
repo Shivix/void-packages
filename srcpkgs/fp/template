@@ -1,0 +1,17 @@
+pkgname=fp
+version=1.0.0
+revision=1
+build_style=zig-build
+configure_args="-Doptimize=ReleaseFast"
+hostmakedepends="zig"
+short_desc="Fuzzy Picker"
+maintainer="shivix <none>"
+license="MIT"
+homepage="https://github.com/Shivix/fp"
+distfiles="https://github.com/Shivix/fp/archive/refs/heads/master.tar.gz"
+checksum=0f82a8608e27183dc51df871755b532268853f00ea261282c0f62fade08f82e3
+
+post_install() {
+	vcompletion completions.fish fish
+	vman fp.1
+}

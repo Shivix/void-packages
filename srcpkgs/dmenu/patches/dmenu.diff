@@ -1,0 +1,159 @@
+diff --git a/config.def.h b/config.def.h
+index 1edb647..a745089 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -2,22 +2,30 @@
+ /* Default settings; can be overriden by command line. */
+ 
+ static int topbar = 1;                      /* -b  option; if 0, dmenu appears at bottom     */
++static int centered = 1;                    /* -c option; centers dmenu on screen */
++static int min_width = 500;                 /* minimum width when centered */
++static const float menu_height_ratio = 2.5f;/* This is the ratio used in the original calculation */
+ /* -fn option overrides fonts[0]; default X11 font or font set */
+ static const char *fonts[] = {
+-	"monospace:size=10"
++    "Jetbrains Mono:size=16"
+ };
+ static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
++static const char bg_normal[]       = "#161616";
++static const char fg_normal[]       = "#efe2c1";
++static const char bg_selected[]     = "#efe2c1";
++static const char fg_selected[]     = "#161616";
+ static const char *colors[SchemeLast][2] = {
+ 	/*     fg         bg       */
+-	[SchemeNorm] = { "#bbbbbb", "#222222" },
+-	[SchemeSel] = { "#eeeeee", "#005577" },
++	[SchemeNorm] = { fg_normal, bg_normal },
++	[SchemeSel]  = { fg_selected, bg_selected },
+ 	[SchemeOut] = { "#000000", "#00ffff" },
+ };
+ /* -l option; if nonzero, dmenu uses vertical list with given number of lines */
+-static unsigned int lines      = 0;
++static unsigned int lines      = 12;
+ 
+ /*
+  * Characters not considered part of a word while deleting words
+  * for example: " /?\"&[]"
+  */
+ static const char worddelimiters[] = " ";
++static unsigned int border_width = 1;
+diff --git a/dmenu.1 b/dmenu.1
+index 323f93c..c036baa 100644
+--- a/dmenu.1
++++ b/dmenu.1
+@@ -40,6 +40,9 @@ which lists programs in the user's $PATH and runs the result in their $SHELL.
+ .B \-b
+ dmenu appears at the bottom of the screen.
+ .TP
++.B \-c
++dmenu appears centered on the screen.
++.TP
+ .B \-f
+ dmenu grabs the keyboard before reading stdin if not reading from a tty. This
+ is faster, but will lock up X until stdin reaches end\-of\-file.
+diff --git a/dmenu.c b/dmenu.c
+index fd49549..e0a64b5 100644
+--- a/dmenu.c
++++ b/dmenu.c
+@@ -29,6 +29,7 @@ enum { SchemeNorm, SchemeSel, SchemeOut, SchemeLast }; /* color schemes */
+ 
+ struct item {
+ 	char *text;
++	unsigned int width;
+ 	struct item *left, *right;
+ 	int out;
+ };
+@@ -95,6 +96,15 @@ calcoffsets(void)
+ 			break;
+ }
+ 
++static int
++max_textw(void)
++{
++	int len = 0;
++	for (struct item *item = items; item && item->text; item++)
++		len = MAX(item->width, len);
++	return len;
++}
++
+ static void
+ cleanup(void)
+ {
+@@ -563,6 +573,7 @@ readstdin(void)
+ 			line[len - 1] = '\0';
+ 		if (!(items[i].text = strdup(line)))
+ 			die("strdup:");
++		items[i].width = TEXTW(line);
+ 
+ 		items[i].out = 0;
+ 	}
+@@ -636,6 +647,7 @@ setup(void)
+ 	bh = drw->fonts->h + 2;
+ 	lines = MAX(lines, 0);
+ 	mh = (lines + 1) * bh;
++	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
+ #ifdef XINERAMA
+ 	i = 0;
+ 	if (parentwin == root && (info = XineramaQueryScreens(dpy, &n))) {
+@@ -662,9 +674,16 @@ setup(void)
+ 				if (INTERSECT(x, y, 1, 1, info[i]) != 0)
+ 					break;
+ 
+-		x = info[i].x_org;
+-		y = info[i].y_org + (topbar ? 0 : info[i].height - mh);
+-		mw = info[i].width;
++		if (centered) {
++			mw = MIN(MAX(max_textw() + promptw, min_width), info[i].width);
++			x = info[i].x_org + ((info[i].width  - mw) / 2);
++			y = info[i].y_org + ((info[i].height - mh) / menu_height_ratio);
++		} else {
++			x = info[i].x_org;
++			y = info[i].y_org + (topbar ? 0 : info[i].height - mh);
++			mw = info[i].width;
++		}
++
+ 		XFree(info);
+ 	} else
+ #endif
+@@ -672,9 +691,16 @@ setup(void)
+ 		if (!XGetWindowAttributes(dpy, parentwin, &wa))
+ 			die("could not get embedding window attributes: 0x%lx",
+ 			    parentwin);
+-		x = 0;
+-		y = topbar ? 0 : wa.height - mh;
+-		mw = wa.width;
++
++		if (centered) {
++			mw = MIN(MAX(max_textw() + promptw, min_width), wa.width);
++			x = (wa.width  - mw) / 2;
++			y = (wa.height - mh) / 2;
++		} else {
++			x = 0;
++			y = topbar ? 0 : wa.height - mh;
++			mw = wa.width;
++		}
+ 	}
+ 	promptw = (prompt && *prompt) ? TEXTW(prompt) - lrpad / 4 : 0;
+ 	inputw = mw / 3; /* input width: ~33% of monitor width */
+@@ -684,9 +710,11 @@ setup(void)
+ 	swa.override_redirect = True;
+ 	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
+ 	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask;
+-	win = XCreateWindow(dpy, root, x, y, mw, mh, 0,
++	win = XCreateWindow(dpy, root, x, y, mw, mh, border_width,
+ 	                    CopyFromParent, CopyFromParent, CopyFromParent,
+ 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
++	if (border_width)
++		XSetWindowBorder(dpy, win, scheme[SchemeSel][ColBg].pixel);
+ 	XSetClassHint(dpy, win, &ch);
+ 
+ 	/* input methods */
+@@ -733,6 +761,8 @@ main(int argc, char *argv[])
+ 			topbar = 0;
+ 		else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
+ 			fast = 1;
++		else if (!strcmp(argv[i], "-c"))   /* centers dmenu on screen */
++			centered = 1;
+ 		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
+ 			fstrncmp = strncasecmp;
+ 			fstrstr = cistrstr;

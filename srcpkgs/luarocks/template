@@ -1,0 +1,21 @@
+pkgname=luarocks
+version=3.13.0
+revision=1
+build_style=configure
+configure_args="
+ --prefix=/usr
+ --sysconfdir=/etc
+ --lua-version=5.4
+ --with-lua-include=/usr/include/lua5.4"
+hostmakedepends="lua54-devel"
+depends="lua54 unzip"
+short_desc="A package manager for Lua modules"
+maintainer="shivix <none>"
+license="MIT"
+homepage="https://github.com/luarocks/luarocks"
+distfiles="https://github.com/luarocks/luarocks/archive/refs/tags/v${version}.tar.gz"
+checksum=71adfead6966e2912034b8fb8103dd343c3adc6c91a276f1d209eebbaefe3a15
+
+post_extract() {
+	vsed -i -e 's;\(unzip_found=\).*;\1/usr/bin/unzip;' configure
+}

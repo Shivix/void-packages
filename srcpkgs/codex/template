@@ -1,0 +1,16 @@
+pkgname=codex
+version=0.116.0
+revision=1
+archs="x86_64*"
+short_desc="OpenAI Codex CLI"
+maintainer="shivix <none>"
+license="Apache-2.0"
+homepage="https://github.com/openai/codex"
+distfiles="https://github.com/openai/codex/releases/download/rust-v${version}/codex-x86_64-unknown-linux-musl.tar.gz"
+checksum=afa089c032c31317921abc02fb881453aed4aa800358412171efcd069ecea1e3
+
+do_install() {
+	vbin codex-x86_64-unknown-linux-musl codex
+	./codex-x86_64-unknown-linux-musl completion fish >codex.fish
+	vcompletion codex.fish fish
+}
