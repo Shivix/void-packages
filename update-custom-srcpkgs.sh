@@ -53,6 +53,12 @@ for pkg in "${pkgs[@]}"; do
 	url=${url//\$pkgname/$pkg}
 	url=${url//\$version/$version}
 
-	checksum=$(curl -fsSL "$url" | sha256sum | awk '{print $1}')
-	sed -i -E "s/^checksum=.*/checksum=$checksum/" "$template"
+	checksum=$(sed -n 's/^checksum=//p' "$template")
+	newchecksum=$(curl -fsSL "$url" | sha256sum | awk '{print $1}')
+	if [[ "$newchecksum" != "$checksum" ]]; then
+		echo "$pkg: new checksum"
+		sed -i -E "s/^checksum=.*/checksum=$newchecksum/" "$template"
+
+		./xbps-src pkg $pkg
+	fi
 done
