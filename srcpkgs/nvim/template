@@ -1,24 +1,14 @@
 pkgname=nvim
 version=0.12.0
 revision=1
-build_style=gnu-makefile
-makedepends="cmake libuv-devel libluv-devel libutf8proc-devel tree-sitter-devel unibilium-devel lua51-lpeg lua51-BitOp"
+build_style=cmake
+makedepends="libuv-devel libluv-devel libutf8proc-devel tree-sitter-devel unibilium-devel lua51-lpeg"
 short_desc="Fork of Vim aiming to improve user experience, plugins and GUIs"
 maintainer="tranzystorekk <tranzystorek.io@protonmail.com>"
 license="Apache-2.0 AND Vim"
 homepage="https://neovim.io"
 distfiles="https://github.com/neovim/neovim/archive/refs/tags/nightly.tar.gz"
 checksum=9945ccc8f5b29c7074859c5c7f94d40b0c69256e5417107c5d419a90c8d62aeb
-
-do_build() {
-	mkdir -p build
-	cd build
-	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${DESTDIR}/usr ..
-}
-
-do_install() {
-	make install --directory build
-}
 
 post_install() {
 	vlicense LICENSE.txt
