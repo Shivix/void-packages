@@ -47,18 +47,37 @@ for pkg in "${pkgs[@]}"; do
 		version="$newver"
 	fi
 
-	distfile=$(sed -n 's/^distfiles="\([^"]*\)"/\1/p' "$template")
-	url=${distfile//\$\{pkgname\}/$pkg}
-	url=${url//\$\{version\}/$version}
-	url=${url//\$pkgname/$pkg}
-	url=${url//\$version/$version}
+	if [[ "$pkg" == "nvim" ]]; then
+		deps_txt="$(curl -fsSL https://raw.githubusercontent.com/neovim/neovim/nightly/cmake.deps/deps.txt)"
+		luajit_url=$(echo "$deps_txt" | awk '$1=="LUAJIT_URL"{print $2; exit}')
+		luv_url=$(echo "$deps_txt" | awk '$1=="LUV_URL"{print $2; exit}')
+		lua_compat53_url=$(echo "$deps_txt" | awk '$1=="LUA_COMPAT53_URL"{print $2; exit}')
+		lpeg_url=$(echo "$deps_txt" | awk '$1=="LPEG_URL"{print $2; exit}')
 
+		luajit_ver=$(basename "$luajit_url" .tar.gz)
+		luv_ver=$(basename "$luv_url" .tar.gz)
+		lua_compat53_ver=$(basename "$lua_compat53_url" .tar.gz)
+		lua_compat53_ver="${lua_compat53_ver#v}"
+		lpeg_ver=$(basename "$lpeg_url" .tar.gz)
+		lpeg_ver="${lpeg_ver#lpeg-}"
+		lpeg_deps_commit=$(echo "$lpeg_url" | sed -E 's#^https://github.com/neovim/deps/raw/([^/]+)/opt/lpeg-.*#\1#')
+
+		sed -i -E "s|^_luajit_version=.*|_luajit_version=$luajit_ver|" "$template"
+		sed -i -E "s|^_luv_version=.*|_luv_version=$luv_ver|" "$template"
+		sed -i -E "s|^_lua_compat53_version=.*|_lua_compat53_version=$lua_compat53_ver|" "$template"
+		sed -i -E "s|^_lpeg_version=.*|_lpeg_version=$lpeg_ver|" "$template"
+		sed -i -E "s|^_lpeg_deps_commit=.*|_lpeg_deps_commit=$lpeg_deps_commit|" "$template"
+		exit 0
+	fi
+
+	distfile=$(./xbps-src show $pkg | awk '/distfiles/ { print $2 }')
 	checksum=$(sed -n 's/^checksum=//p' "$template")
-	newchecksum=$(curl -fsSL "$url" | sha256sum | awk '{print $1}')
+	newchecksum=$(curl -fsSL "$distfile" | sha256sum | awk '{print $1}')
 	if [[ "$newchecksum" != "$checksum" ]]; then
 		echo "$pkg: new checksum"
 		sed -i -E "s/^checksum=.*/checksum=$newchecksum/" "$template"
-
-		./xbps-src pkg $pkg
+		echo ./xbps-src clean "$pkg"
+		echo ./xbps-src pkg "$pkg"
+		echo sudo xbps-install --yes --repository hostdir/binpkgs/local $pkg -f
 	fi
 done
