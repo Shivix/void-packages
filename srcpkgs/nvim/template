@@ -1,14 +1,47 @@
+# Template file for 'nvim'
 pkgname=nvim
 version=0.12.0
 revision=1
+# as per https://github.com/neovim/neovim/blob/master/cmake.deps/deps.txt
+_luajit_version=659a61693aa3b87661864ad0f12eee14c865cd7f
+_luv_version=1.52.1-0
+_lua_compat53_version=0.13
+_lpeg_version=1.1.0
 build_style=cmake
-makedepends="libuv-devel libluv-devel libutf8proc-devel tree-sitter-devel unibilium-devel lua51-lpeg"
+_deps_cmake_args="-DCMAKE_BUILD_TYPE=Release -DUSE_BUNDLED=OFF -DUSE_BUNDLED_LUAJIT=ON -DUSE_BUNDLED_LUV=ON -DUSE_BUNDLED_LPEG=ON"
+configure_args="-DCOMPILE_LUA=ON -DPREFER_LUA=OFF ${_deps_cmake_args}"
+makedepends="libuv-devel libutf8proc-devel tree-sitter-devel unibilium-devel"
 short_desc="Fork of Vim aiming to improve user experience, plugins and GUIs"
-maintainer="tranzystorekk <tranzystorek.io@protonmail.com>"
+maintainer="shivix <none>"
 license="Apache-2.0 AND Vim"
 homepage="https://neovim.io"
-distfiles="https://github.com/neovim/neovim/archive/refs/tags/nightly.tar.gz"
-checksum=9945ccc8f5b29c7074859c5c7f94d40b0c69256e5417107c5d419a90c8d62aeb
+changelog="https://github.com/neovim/neovim/releases"
+distfiles="https://github.com/neovim/neovim/archive/refs/tags/nightly.tar.gz
+ https://github.com/luajit/luajit/archive/${_luajit_version}.tar.gz>luajit_${_luajit_version}.tar.gz
+ https://github.com/luvit/luv/archive/${_luv_version}.tar.gz>luv_${_luv_version}.tar.gz
+ https://github.com/lunarmodules/lua-compat-5.3/archive/v${_lua_compat53_version}.tar.gz>lua_compat53_${_lua_compat53_version}.tar.gz
+ https://github.com/neovim/deps/raw/d495ee6f79e7962a53ad79670cb92488abe0b9b4/opt/lpeg-${_lpeg_version}.tar.gz>lpeg_${_lpeg_version}.tar.gz"
+checksum="9945ccc8f5b29c7074859c5c7f94d40b0c69256e5417107c5d419a90c8d62aeb
+ 2988bb0609e24a65f87c37320873eda23170f004180e0318e8093cd0a8245216
+ e8b8774b31d24be4fcf2b021b90599ecccc8e476c61efcc59c3c10cab813a885
+ f5dc30e7b1fda856ee4d392be457642c1f0c259264a9b9bfbcb680302ce88fc2
+ 4b155d67d2246c1ffa7ad7bc466c1ea899bbc40fef0257cc9c03cecbaed4352a"
+skip_extraction="
+ luajit_${_luajit_version}.tar.gz
+ luv_${_luv_version}.tar.gz
+ lua_compat53_${_lua_compat53_version}.tar.gz
+ lpeg_${_lpeg_version}.tar.gz"
+
+post_extract() {
+	for _distfile in ${skip_extraction}; do
+		vsrcextract -C .deps/build/src/${_distfile%_*} ${_distfile}
+	done
+}
+
+pre_configure() {
+	cmake -S cmake.deps -B .deps ${_deps_cmake_args} -DUSE_EXISTING_SRC_DIR=ON
+	cmake --build .deps
+}
 
 post_install() {
 	vlicense LICENSE.txt
