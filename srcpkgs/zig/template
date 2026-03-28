@@ -1,13 +1,13 @@
 pkgname=zig
-version=0.16.0dev.2915
+version=0.16.0dev.3006+94355f192
 revision=1
 archs="x86_64*"
 short_desc="General-purpose programming language and toolchain"
 maintainer="shivix <none>"
 license="MIT"
 homepage="https://ziglang.org"
-distfiles="https://ziglang.org/builds/zig-x86_64-linux-0.16.0-dev.2915+065c6e794.tar.xz"
-checksum=ecdbcaf213e33f4117bc75c1b885a7e043450c907627d8b2a35c4e60eb07d0ad
+distfiles="https://ziglang.org/builds/zig-x86_64-linux-${version/dev./-dev.}.tar.xz"
+checksum=c05b0d63c4a2caf927a8f2c4600a2c602d2e6cf9b152de40e031060e8c25283f
 
 do_install() {
 	vbin zig

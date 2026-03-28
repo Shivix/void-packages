@@ -28,6 +28,10 @@ latest_suckless_tag() {
 		| tail -n1
 }
 
+latest_zig_master_version() {
+	curl -fsSL "https://ziglang.org/download/index.json" | jq -r '.master.version | sub("-dev\\."; "dev.")'
+}
+
 for pkg in "${pkgs[@]}"; do
 	template="srcpkgs/$pkg/template"
 
@@ -38,6 +42,7 @@ for pkg in "${pkgs[@]}"; do
 		dmenu|dwm|sent) newver=$(latest_suckless_tag "$pkg") ;;
 		luarocks)newver=$(latest_stable_tag "https://github.com/luarocks/luarocks.git" "v") ;;
 		prefix)  newver=$(latest_stable_tag "https://github.com/Shivix/prefix.git" "v") ;;
+		zig)     newver=$(latest_zig_master_version) ;;
 		*)       newver="$version" ;;
 	esac
 
