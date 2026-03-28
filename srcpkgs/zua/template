@@ -7,7 +7,7 @@ maintainer="shivix <none>"
 license="MIT"
 homepage="https://github.com/Shivix/zua.lua"
 distfiles="https://github.com/Shivix/zua.lua/archive/refs/heads/simple.tar.gz"
-checksum=fe099312b972a8f02eea4afa63d1d41dfc76b87b32f55304d3f1a8277926f6f0
+checksum=13f8eabe3b96d4cc22e08c91bc7988949c1f9ad46716186a18435a35ad1ec87d
 
 post_install() {
 	vcompletion zua.fish fish

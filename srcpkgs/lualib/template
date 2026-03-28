@@ -10,4 +10,4 @@ maintainer="shivix <none>"
 license="MIT"
 homepage="https://github.com/Shivix/lualib"
 distfiles="https://github.com/Shivix/lualib/archive/refs/heads/master.tar.gz"
-checksum=aa801f3af268e9ceda6e69e6ca94ac8ee6f6bad3d3645c5ef88716ad02b3d0eb
+checksum=fff25e4f86095dac16188e85a5e40929e5312328045e09906a01e1037241f9d0
