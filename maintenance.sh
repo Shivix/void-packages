@@ -4,6 +4,8 @@ set -euo pipefail
 
 sudo xbps-install -Su
 
+git fetch upstream
+git rebase -i upstream/master --autostash
 ./update-custom-srcpkgs.sh
 
 sudo xbps-remove -O
