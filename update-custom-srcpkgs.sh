@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-pkgs=(codex dmenu dwm fp lualib luarocks lus nvim prefix sent zig zls zua)
+pkgs=("$@")
+(( ${#pkgs[@]} == 0 )) && pkgs=(codex dmenu dwm fp lualib luarocks lus nvim prefix sent zig zls zua)
 
 latest_stable_tag() {
 	local repo="$1" prefix="$2"
@@ -70,14 +71,14 @@ for pkg in "${pkgs[@]}"; do
 		exit 0
 	fi
 
-	distfile=$(./xbps-src show $pkg | awk '/distfiles/ { print $2 }')
+	distfile=$(./xbps-src show "$pkg" | awk '/distfiles/ { print $2 }')
 	checksum=$(sed -n 's/^checksum=//p' "$template")
 	newchecksum=$(curl -fsSL "$distfile" | sha256sum | awk '{print $1}')
 	if [[ "$newchecksum" != "$checksum" ]]; then
 		echo "$pkg: new checksum"
 		sed -i -E "s/^checksum=.*/checksum=$newchecksum/" "$template"
-		echo ./xbps-src clean "$pkg"
-		echo ./xbps-src pkg "$pkg"
-		echo sudo xbps-install --yes --repository hostdir/binpkgs/local $pkg -f
+		./xbps-src clean "$pkg"
+		./xbps-src pkg "$pkg"
+		sudo xbps-install --yes --repository hostdir/binpkgs/local "$pkg" -f
 	fi
 done

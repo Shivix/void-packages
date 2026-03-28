@@ -18,6 +18,10 @@
 !/etc
 !/srcpkgs
 !/xbps-src
+!/maintenance.sh
+!/update-custom-srcpkgs.sh
+!/install-custom-srcpkgs.sh
+!/uninstall-custom-srcpkgs.sh
 etc/conf
 etc/conf.*
 etc/virtual
