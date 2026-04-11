@@ -23,7 +23,7 @@ if [[ -n "$orphan_list" ]]; then
 	fi
 fi
 
-sudo mandb
+sudo makewhatis /usr/share/man
 
 sudo fstrim /
 
