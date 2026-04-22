@@ -29,7 +29,7 @@ latest_suckless_tag() {
 }
 
 latest_zig_master_version() {
-	curl -fsSL "https://ziglang.org/download/index.json" | jq -r '.master.version | sub("-dev\\."; "dev.")'
+    curl -fsSL "https://ziglang.org/download/index.json" | jq  -r 'keys[]  | select(test("^[0-9]+.[0-9]+.[0-9]+$"))' | sort -V | tail -1
 }
 
 for pkg in "${pkgs[@]}"; do
@@ -52,7 +52,6 @@ for pkg in "${pkgs[@]}"; do
 		echo "$pkg: $version -> $newver"
 		version="$newver"
 	fi
-fi
 
 	distfile=$(./xbps-src show "$pkg" | awk '/distfiles/ { print $2 }')
 	checksum=$(sed -n 's/^checksum=//p' "$template")
