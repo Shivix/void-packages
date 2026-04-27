@@ -7,5 +7,5 @@ short_desc="Zig language server"
 maintainer="Shivix <none>"
 license="MIT"
 homepage="https://github.com/zigtools/zls"
-distfiles="https://github.com/zigtools/zls/archive/refs/heads/master.tar.gz"
-checksum=c6f61a1914c60d2e0dd0e25c9149035988c05985cdf83b490bfa4d15dca9a31b
+distfiles="https://github.com/zigtools/zls/archive/${version}.tar.gz"
+checksum=e7c5936f5b3a057ce851be0876e4e259b5c4d02f9aae038cd24a5d6b586b029f

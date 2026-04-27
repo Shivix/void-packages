@@ -9,7 +9,7 @@ maintainer="shivix <none>"
 license="MIT"
 homepage="https://github.com/Shivix/fp"
 distfiles="https://github.com/Shivix/fp/archive/refs/heads/master.tar.gz"
-checksum=ddcdd3fdbc48cea33e9b3509f87f998bd9814f6f918b4bac9e3dc069d984f7ff
+checksum=6ab024a0018ac7f08a1eafed93b4db4d2bcc12a7a7ab5f8885d2002987f71983
 
 post_install() {
 	vcompletion completions.fish fish

@@ -1,8 +1,8 @@
 diff --git a/config.def.h b/config.def.h
-index 9efa774..41ecdbf 100644
+index 81c3fc0..eccacb0 100644
 --- a/config.def.h
 +++ b/config.def.h
-@@ -3,50 +3,59 @@
+@@ -3,36 +3,45 @@
  /* appearance */
  static const unsigned int borderpx  = 1;        /* border pixel of windows */
  static const unsigned int snap      = 32;       /* snap pixel */
@@ -63,7 +63,7 @@ index 9efa774..41ecdbf 100644
  static const int nmaster     = 1;    /* number of clients in master area */
  static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
  static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
- static const int refreshrate = 120;  /* refresh rate (per second) for client move/resize */
+@@ -40,13 +49,13 @@ static const int refreshrate = 120;  /* refresh rate (per second) for client mov
  
  static const Layout layouts[] = {
  	/* symbol     arrange function */
@@ -79,7 +79,7 @@ index 9efa774..41ecdbf 100644
  #define TAGKEYS(KEY,TAG) \
  	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
  	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
-@@ -57,21 +66,21 @@ static const Layout layouts[] = {
+@@ -58,20 +67,20 @@ static const Layout layouts[] = {
  
  /* commands */
  static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
@@ -96,29 +96,45 @@ index 9efa774..41ecdbf 100644
  	{ MODKEY,                       XK_b,      togglebar,      {0} },
 -	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 -	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
-+	{ MODKEY,                       XK_l,      focusstack,     {.i = +1 } },
-+	{ MODKEY,                       XK_h,      focusstack,     {.i = -1 } },
- 	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
- 	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
+-	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
+-	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
 -	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
 -	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
--	{ MODKEY,                       XK_Return, zoom,           {0} },
++	{ MODKEY,                       XK_l,      focusstack,     {.i = +1 } },
++	{ MODKEY,                       XK_h,      focusstack,     {.i = -1 } },
++	//{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
++	//{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
 +	{ MODKEY,                       XK_k,      setmfact,       {.f = -0.05} },
 +	{ MODKEY,                       XK_j,      setmfact,       {.f = +0.05} },
-+	{ MODKEY|ShiftMask,             XK_Return, zoom,           {0} },
+ 	{ MODKEY,                       XK_Return, zoom,           {0} },
  	{ MODKEY,                       XK_Tab,    view,           {0} },
  	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
- 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
-@@ -93,7 +102,6 @@ static const Key keys[] = {
- 	TAGKEYS(                        XK_6,                      5)
- 	TAGKEYS(                        XK_7,                      6)
- 	TAGKEYS(                        XK_8,                      7)
+@@ -86,15 +95,14 @@ static const Key keys[] = {
+ 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
+ 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
+ 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
+-	TAGKEYS(                        XK_1,                      0)
+-	TAGKEYS(                        XK_2,                      1)
+-	TAGKEYS(                        XK_3,                      2)
+-	TAGKEYS(                        XK_4,                      3)
+-	TAGKEYS(                        XK_5,                      4)
+-	TAGKEYS(                        XK_6,                      5)
+-	TAGKEYS(                        XK_7,                      6)
+-	TAGKEYS(                        XK_8,                      7)
 -	TAGKEYS(                        XK_9,                      8)
++	TAGKEYS(                        XK_w,                      0)
++	TAGKEYS(                        XK_e,                      1)
++	TAGKEYS(                        XK_r,                      2)
++	TAGKEYS(                        XK_t,                      3)
++	TAGKEYS(                        XK_y,                      4)
++	TAGKEYS(                        XK_u,                      5)
++	TAGKEYS(                        XK_i,                      6)
++	TAGKEYS(                        XK_o,                      7)
  	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
  };
  
 diff --git a/dwm.c b/dwm.c
-index 1443802..5c0606d 100644
+index 53b393e..7cecd7f 100644
 --- a/dwm.c
 +++ b/dwm.c
 @@ -56,12 +56,27 @@
@@ -434,12 +450,9 @@ index 1443802..5c0606d 100644
 +		req = xatom[XembedInfo];
 +
 +	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
--		&da, &di, &nitems, &dl, &p) == Success && p) {
--		if (nitems > 0)
--			atom = *(Atom *)p;
-+		&da, &di, &nitems, &dl, &p) == Success && p) {
-+		if (nitems > 0)
-+			atom = *(Atom *)p;
+ 		&da, &di, &nitems, &dl, &p) == Success && p) {
+ 		if (nitems > 0)
+ 			atom = *(Atom *)p;
 +		if (da == xatom[XembedInfo] && nitems == 2)
 +			atom = ((Atom *)p)[1];
  		XFree(p);
@@ -460,7 +473,7 @@ index 1443802..5c0606d 100644
  int
  getrootptr(int *x, int *y)
  {
-@@ -1016,7 +1127,8 @@ killclient(const Arg *arg)
+@@ -1017,7 +1128,8 @@ killclient(const Arg *arg)
  {
  	if (!selmon->sel)
  		return;
@@ -470,7 +483,7 @@ index 1443802..5c0606d 100644
  		XGrabServer(dpy);
  		XSetErrorHandler(xerrordummy);
  		XSetCloseDownMode(dpy, DestroyAll);
-@@ -1067,6 +1179,8 @@ manage(Window w, XWindowAttributes *wa)
+@@ -1068,6 +1180,8 @@ manage(Window w, XWindowAttributes *wa)
  	updatewindowtype(c);
  	updatesizehints(c);
  	updatewmhints(c);
@@ -479,7 +492,7 @@ index 1443802..5c0606d 100644
  	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
  	grabbuttons(c, 0);
  	if (!c->isfloating)
-@@ -1103,6 +1217,13 @@ maprequest(XEvent *e)
+@@ -1104,6 +1218,13 @@ maprequest(XEvent *e)
  	static XWindowAttributes wa;
  	XMapRequestEvent *ev = &e->xmaprequest;
  
@@ -493,7 +506,7 @@ index 1443802..5c0606d 100644
  	if (!XGetWindowAttributes(dpy, ev->window, &wa) || wa.override_redirect)
  		return;
  	if (!wintoclient(ev->window))
-@@ -1224,6 +1345,17 @@ propertynotify(XEvent *e)
+@@ -1225,6 +1346,17 @@ propertynotify(XEvent *e)
  	Window trans;
  	XPropertyEvent *ev = &e->xproperty;
  
@@ -511,7 +524,7 @@ index 1443802..5c0606d 100644
  	if ((ev->window == root) && (ev->atom == XA_WM_NAME))
  		updatestatus();
  	else if (ev->state == PropertyDelete)
-@@ -1274,6 +1406,19 @@ recttomon(int x, int y, int w, int h)
+@@ -1275,6 +1407,19 @@ recttomon(int x, int y, int w, int h)
  	return r;
  }
  
@@ -531,7 +544,7 @@ index 1443802..5c0606d 100644
  void
  resize(Client *c, int x, int y, int w, int h, int interact)
  {
-@@ -1281,6 +1426,14 @@ resize(Client *c, int x, int y, int w, int h, int interact)
+@@ -1282,6 +1427,14 @@ resize(Client *c, int x, int y, int w, int h, int interact)
  		resizeclient(c, x, y, w, h);
  }
  
@@ -546,7 +559,7 @@ index 1443802..5c0606d 100644
  void
  resizeclient(Client *c, int x, int y, int w, int h)
  {
-@@ -1296,6 +1449,19 @@ resizeclient(Client *c, int x, int y, int w, int h)
+@@ -1297,6 +1450,19 @@ resizeclient(Client *c, int x, int y, int w, int h)
  	XSync(dpy, False);
  }
  
@@ -566,7 +579,7 @@ index 1443802..5c0606d 100644
  void
  resizemouse(const Arg *arg)
  {
-@@ -1442,26 +1608,37 @@ setclientstate(Client *c, long state)
+@@ -1443,26 +1609,37 @@ setclientstate(Client *c, long state)
  }
  
  int
@@ -615,7 +628,7 @@ index 1443802..5c0606d 100644
  	}
  	return exists;
  }
-@@ -1475,7 +1652,7 @@ setfocus(Client *c)
+@@ -1476,7 +1653,7 @@ setfocus(Client *c)
  			XA_WINDOW, 32, PropModeReplace,
  			(unsigned char *) &(c->win), 1);
  	}
@@ -624,7 +637,7 @@ index 1443802..5c0606d 100644
  }
  
  void
-@@ -1571,6 +1748,10 @@ setup(void)
+@@ -1572,6 +1749,10 @@ setup(void)
  	wmatom[WMTakeFocus] = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
  	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
  	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
@@ -635,7 +648,7 @@ index 1443802..5c0606d 100644
  	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
  	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
  	netatom[NetWMCheck] = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
-@@ -1578,6 +1759,9 @@ setup(void)
+@@ -1579,6 +1760,9 @@ setup(void)
  	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
  	netatom[NetWMWindowTypeDialog] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
  	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
@@ -645,7 +658,7 @@ index 1443802..5c0606d 100644
  	/* init cursors */
  	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
  	cursor[CurResize] = drw_cur_create(drw, XC_sizing);
-@@ -1586,6 +1770,8 @@ setup(void)
+@@ -1587,6 +1771,8 @@ setup(void)
  	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
  	for (i = 0; i < LENGTH(colors); i++)
  		scheme[i] = drw_scm_create(drw, colors[i], 3);
@@ -654,7 +667,7 @@ index 1443802..5c0606d 100644
  	/* init bars */
  	updatebars();
  	updatestatus();
-@@ -1700,12 +1886,12 @@ tile(Monitor *m)
+@@ -1701,12 +1887,12 @@ tile(Monitor *m)
  	for (i = my = ty = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
  		if (i < m->nmaster) {
  			h = (m->wh - my) / (MIN(n, m->nmaster) - i);
@@ -669,7 +682,7 @@ index 1443802..5c0606d 100644
  			if (ty + HEIGHT(c) < m->wh)
  				ty += HEIGHT(c);
  		}
-@@ -1716,7 +1902,18 @@ togglebar(const Arg *arg)
+@@ -1717,7 +1903,18 @@ togglebar(const Arg *arg)
  {
  	selmon->showbar = !selmon->showbar;
  	updatebarpos(selmon);
@@ -689,7 +702,7 @@ index 1443802..5c0606d 100644
  	arrange(selmon);
  }
  
-@@ -1812,11 +2009,18 @@ unmapnotify(XEvent *e)
+@@ -1813,11 +2010,18 @@ unmapnotify(XEvent *e)
  		else
  			unmanage(c, 0);
  	}
@@ -708,7 +721,7 @@ index 1443802..5c0606d 100644
  	Monitor *m;
  	XSetWindowAttributes wa = {
  		.override_redirect = True,
-@@ -1827,10 +2031,15 @@ updatebars(void)
+@@ -1828,10 +2032,15 @@ updatebars(void)
  	for (m = mons; m; m = m->next) {
  		if (m->barwin)
  			continue;
@@ -725,7 +738,7 @@ index 1443802..5c0606d 100644
  		XMapRaised(dpy, m->barwin);
  		XSetClassHint(dpy, m->barwin, &ch);
  	}
-@@ -2007,6 +2216,125 @@ updatestatus(void)
+@@ -2008,6 +2217,125 @@ updatestatus(void)
  	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
  		strcpy(stext, "dwm-"VERSION);
  	drawbar(selmon);
@@ -851,7 +864,7 @@ index 1443802..5c0606d 100644
  }
  
  void
-@@ -2074,6 +2402,16 @@ wintoclient(Window w)
+@@ -2075,6 +2403,16 @@ wintoclient(Window w)
  	return NULL;
  }
  
@@ -868,7 +881,7 @@ index 1443802..5c0606d 100644
  Monitor *
  wintomon(Window w)
  {
-@@ -2127,6 +2465,22 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
+@@ -2128,6 +2466,22 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
  	return -1;
  }
  
@@ -891,7 +904,7 @@ index 1443802..5c0606d 100644
  void
  zoom(const Arg *arg)
  {
-@@ -2144,7 +2498,10 @@ main(int argc, char *argv[])
+@@ -2145,7 +2499,10 @@ main(int argc, char *argv[])
  {
  	if (argc == 2 && !strcmp("-v", argv[1]))
  		die("dwm-"VERSION);

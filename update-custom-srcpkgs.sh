@@ -21,11 +21,12 @@ latest_stable_tag() {
 
 latest_suckless_tag() {
 	local project="$1"
-	curl -fsSL "https://git.suckless.org/${project}/refs.html" \
-		| grep -Eo '>[0-9]+(\.[0-9]+)*<' \
-		| tr -d '<>' \
-		| sort -V \
-		| tail -n1
+  	git ls-remote --tags "https://git.suckless.org/$project" \
+  	| sed 's#.*refs/tags/##' \
+  	| sed 's/\^{}//' \
+  	| grep -E '^[0-9]+(\.[0-9]+)*$' \
+  	| sort -V \
+  	| tail -n1
 }
 
 latest_zig_master_version() {
@@ -43,6 +44,7 @@ for pkg in "${pkgs[@]}"; do
 		luarocks)newver=$(latest_stable_tag "https://github.com/luarocks/luarocks.git" "v") ;;
 		prefix)  newver=$(latest_stable_tag "https://github.com/Shivix/prefix.git" "v") ;;
 		zig)     newver=$(latest_zig_master_version) ;;
+		zls)     newver=$(latest_stable_tag "https://github.com/zigtools/zls.git" "") ;;
 		*)       newver="$version" ;;
 	esac
 
@@ -55,12 +57,14 @@ for pkg in "${pkgs[@]}"; do
 
 	distfile=$(./xbps-src show "$pkg" | awk '/distfiles/ { print $2 }')
 	checksum=$(sed -n 's/^checksum=//p' "$template")
-	newchecksum=$(curl -fsSL "$distfile" | sha256sum | awk '{print $1}')
+	newchecksum=$(curl --no-buffer -fsSL "$distfile" | sha256sum | awk '{print $1}')
 	if [[ "$newchecksum" != "$checksum" ]]; then
 		echo "$pkg: new checksum"
 		sed -i -E "s/^checksum=.*/checksum=$newchecksum/" "$template"
 		./xbps-src clean "$pkg"
 		./xbps-src pkg "$pkg"
 		sudo xbps-install --yes --repository hostdir/binpkgs/local "$pkg" -f
+	else
+		echo "$pkg: up to date"
 	fi
 done
