@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+# Use args as pkg list, else install all if none provided.
 pkgs=("$@")
 (( ${#pkgs[@]} == 0 )) && pkgs=(codex dmenu dwm fp lualib luarocks lus prefix sent zig zls zua)
 
