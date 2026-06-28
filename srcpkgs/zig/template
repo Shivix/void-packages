@@ -6,7 +6,7 @@ short_desc="General-purpose programming language and toolchain"
 maintainer="shivix <none>"
 license="MIT"
 homepage="https://ziglang.org"
-distfiles="https://ziglang.org/builds/zig-x86_64-linux-${version}.tar.xz"
+distfiles="https://ziglang.org/download/${version}/zig-x86_64-linux-${version}.tar.xz"
 checksum=70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00
 
 do_install() {
