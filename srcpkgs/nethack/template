@@ -24,6 +24,7 @@ do_build() {
 	make all \
 		CC="$CC" LINK="$CC" LFLAGS="$LDFLAGS" LEX=flex \
 		COLCMD="sed 's/.\x08//g'" \
+		WANT_WIN_CURSES=1 \
 		HACKDIR="/var/games/nethack"
 }
 
@@ -43,6 +44,7 @@ do_install() {
 		GAMEPERM=0755 \
 		DIRPERM=0775 \
 		VARDIRPERM=0775 \
+		WANT_WIN_CURSES=1 \
 		CHOWN=: CHGRP=: LEX=Flex
 
 	mv $DESTDIR/usr/lib/nethack/nhdat $DESTDIR/var/games/nethack

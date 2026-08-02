@@ -35,7 +35,7 @@ latest_zig_master_version() {
 }
 
 for pkg in "${pkgs[@]}"; do
-    emplate="srcpkgs/$pkg/template"
+    template="srcpkgs/$pkg/template"
 
     version=$(sed -n 's/^version=//p' "$template")
 
@@ -72,7 +72,7 @@ for pkg in "${pkgs[@]}"; do
         sed -i -E "s/^checksum=.*/checksum=$newchecksum/" "$template"
         ./xbps-src clean "$pkg"
         ./xbps-src pkg "$pkg"
-        sudo xbps-install --yes --repository hostdir/binpkgs/local "$pkg" -f
+        doas xbps-install --yes --repository hostdir/binpkgs/local "$pkg" -f
     else
         echo "$pkg: up to date"
     fi

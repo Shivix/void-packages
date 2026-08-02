@@ -7,5 +7,5 @@ pkgs=(codex dmenu dwm zig fp lualib lus prefix sent zls zua)
 
 for pkg in "${pkgs[@]}"; do
 	./xbps-src pkg "$pkg"
-	sudo xbps-install --yes --repository hostdir/binpkgs/local "$pkg"
+	doas xbps-install --yes --repository hostdir/binpkgs/local "$pkg"
 done
